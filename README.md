@@ -16,7 +16,6 @@ In game you can find some power ups:
 * ***bomb(black sphere)*** - give you super rocket(you can heve only one)
 * ***speedup box*** - give you ability to use some boost 
 * and there is room to add more power ups but these are basic
-* 
 ---
 
 I've done simply leaderboard and few simply widget.
