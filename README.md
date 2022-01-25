@@ -4,7 +4,7 @@ The game is made with UnrealEngine mostly with c++, only few thing was done with
 
 The goal of level is to find end plate or kill all enemies. - at this moment there is only one level
 
-In game you can find some power ups:
+In game you can find some power ups:\n
 coin - give you more points
 heart - restore your health
 ammo crate - give you more bullets
