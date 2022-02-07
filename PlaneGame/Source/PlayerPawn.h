@@ -91,6 +91,8 @@ public:
 	 */
 	void SetLoadedData(FVector LastPlayerLocation, FRotator LastPlayerRotation, bool bHasBomb, bool bHasSpeedUp, int hasBullets, float hasPoints, float hasHealth);
 
+	void SetLoadedProperties(bool bHasBomb, bool bHasSpeedUp, int hasBullets, float hasPoints, float hasHealth);
+
 	/**
 	 * Function to load data from saved game
 	 *

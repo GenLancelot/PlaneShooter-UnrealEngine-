@@ -143,9 +143,7 @@ void APlayerPawn::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, clas
 {
 	if (OtherActor->ActorHasTag("EndGamePlate"))
 	{
-		//#TODO:Move to next level - probably will be needed to put playerdata in gameinstance or sth
-		//GameInstance->NextLevel();
-		//UGameplayStatics::OpenLevel(GetWorld(), GameInstance->GetCurrentLevelName());
+		
 		GameMode->PlayerReachedEndPlate();
 	}
 	if (OtherActor->ActorHasTag("PowerUps.Bullet") || OtherActor->ActorHasTag("PowerUps.SpeedUp") ||
@@ -175,6 +173,15 @@ void APlayerPawn::ApplyDamage(float Damage)
 void APlayerPawn::SetLoadedData(FVector LastPlayerLocation, FRotator LastPlayerRotation, bool bHasBomb, bool bHasSpeedUp, int hasBullets, float hasPoints, float hasHealth)
 {
 	SetActorLocationAndRotation(LastPlayerLocation, LastPlayerRotation);
+	bHaveBomb = bHasBomb;
+	bHaveBoost = bHasSpeedUp;
+	BulletCount = hasBullets;
+	Points = hasPoints;
+	CurrentHealth = hasHealth;
+}
+
+void APlayerPawn::SetLoadedProperties(bool bHasBomb, bool bHasSpeedUp, int hasBullets, float hasPoints, float hasHealth)
+{
 	bHaveBomb = bHasBomb;
 	bHaveBoost = bHasSpeedUp;
 	BulletCount = hasBullets;

@@ -30,63 +30,24 @@ void APlayGameMode::BeginPlay()
 			StatisticWidget->AddToViewport();
 		}
 	}
-	if (GameInstance->ShouldLoadSavedGame())
+	if (GameInstance->GetNewLevel())
 	{
 		GameInstance->LoadGame();
-		if (GameInstance->GetCurrentLevel() != SAVEGAME->CurrentLevel)
-		{
-			GameInstance->SetCurrentLevel(SAVEGAME->CurrentLevel);
-			UGameplayStatics::OpenLevel(GetWorld(), GameInstance->GetCurrentLevelName());
-		}
-		Player->SetLoadedData(SAVEGAME->PlayerInfo.PlayerLocation,
-			SAVEGAME->PlayerInfo.PlayerRotation,
-			SAVEGAME->PlayerInfo.bHasBomb, 
-			SAVEGAME->PlayerInfo.bHasSpeedUp, 
-			SAVEGAME->PlayerInfo.Bullets, 
+		if(Player != nullptr)
+		Player->SetLoadedProperties(
+			SAVEGAME->PlayerInfo.bHasBomb,
+			SAVEGAME->PlayerInfo.bHasSpeedUp,
+			SAVEGAME->PlayerInfo.Bullets,
 			SAVEGAME->PlayerInfo.Points,
 			SAVEGAME->PlayerInfo.Health);
-		TArray<AActor*> AIs;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseAI::StaticClass(), AIs);
-		for (AActor* Actor : AIs)
-		{
-			ABaseAI* Bot = Cast<ABaseAI>(Actor);
-			FName BotName = Bot->GetFName();
-			bool IsDead = true;
-			for (int32 i = 0; i < GameInstance->SaveGameObject->BotsInfo.Num(); i++)
-			{
-				if (SAVEGAME->BotsInfo[i].BotName == BotName)
-				{
-					Bot->LoadedData(SAVEGAME->BotsInfo[i].bDead, SAVEGAME->BotsInfo[i].Health);
-					IsDead = false;
-					break;
-				}
-			}
-			if (IsDead)
-			{
-				Bot->LoadedData(IsDead, 0.f);
-			}
-		}
-		TArray<AActor*> PowerUps;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APowerUp::StaticClass(), PowerUps);
-		for (AActor* Actor : PowerUps)
-		{
-			APowerUp* PowerUp = Cast<APowerUp>(Actor);
-			FName PowerUpName = PowerUp->GetFName();
-			bool bTaken = true;
-			for (int32 i = 0; i < GameInstance->SaveGameObject->PowerUpsInfo.Num(); i++)
-			{
-				if (SAVEGAME->PowerUpsInfo[i].PowerUpName == PowerUpName)
-				{
-					PowerUp->LoadedData(false);
-					bTaken = false;
-					break;
-				}
-			}
-			if (bTaken)
-			{
-				PowerUp->LoadedData(bTaken);
-			}
-		}
+		else
+			UE_LOG(LogTemp, Warning, TEXT("Loading player properties - doesnt work"));
+		GameInstance->SetNewLevel(false);
+	}
+	if (GameInstance->ShouldLoadSavedGame())
+	{
+		LoadData();
+		GameInstance->SetShouldLoadSavedGame(false);
 	}
 }
 
@@ -116,6 +77,16 @@ void APlayGameMode::ParseDataToSave()
 		SAVEGAME->PowerUpsInfo.Emplace(PowerUpName, false);
 	}
 	SAVEGAME->CurrentLevel = GameInstance->GetCurrentLevel();
+	GameInstance->SaveGame();
+}
+
+
+void APlayGameMode::ParsePlayerData()
+{
+	GameInstance->LoadGame();
+	Player->GetPlayerInfo(SAVEGAME->PlayerInfo.PlayerLocation, SAVEGAME->PlayerInfo.PlayerRotation,
+		SAVEGAME->PlayerInfo.bHasBomb, SAVEGAME->PlayerInfo.bHasSpeedUp, SAVEGAME->PlayerInfo.Bullets,
+		SAVEGAME->PlayerInfo.Points, SAVEGAME->PlayerInfo.Health);
 	GameInstance->SaveGame();
 }
 
@@ -219,9 +190,16 @@ void APlayGameMode::PawnKilled(bool bPlayer)
 
 	if (GetTargetsCount() == 0)
 	{
-		EndGame(true);
+		EndLevel();
 	}
 
+}
+
+void APlayGameMode::EndLevel() 
+{ 
+	if (GameInstance->GetCurrentLevel() == MAXLEVEL) 
+		EndGame(true); 
+	ParsePlayerData();
 }
 
 void APlayGameMode::EndGame(bool bPlayerWin)
@@ -270,4 +248,74 @@ void APlayGameMode::EndGame(bool bPlayerWin)
 void APlayGameMode::AfterGameEnd()
 {
 	UGameplayStatics::OpenLevel(GetWorld(), "MainMenuLevel");
+}
+
+void APlayGameMode::MoveToNextLevel()
+{
+	//#TODO:Move to next level - probably will be needed to put playerdata in gameinstance or sth
+	UE_LOG(LogTemp, Warning, TEXT("Moving to next level"));
+	GameInstance->NextLevel();
+	GameInstance->SetNewLevel(true);
+	UGameplayStatics::OpenLevel(GetWorld(), GameInstance->GetCurrentLevelName());
+}
+
+void APlayGameMode::LoadData()
+{
+	GameInstance->LoadGame();
+	if (GameInstance->GetCurrentLevel() != SAVEGAME->CurrentLevel)
+	{
+		GameInstance->SetCurrentLevel(SAVEGAME->CurrentLevel);
+		UGameplayStatics::OpenLevel(GetWorld(), GameInstance->GetCurrentLevelName());
+	}
+	Player->SetLoadedData(SAVEGAME->PlayerInfo.PlayerLocation,
+		SAVEGAME->PlayerInfo.PlayerRotation,
+		SAVEGAME->PlayerInfo.bHasBomb,
+		SAVEGAME->PlayerInfo.bHasSpeedUp,
+		SAVEGAME->PlayerInfo.Bullets,
+		SAVEGAME->PlayerInfo.Points,
+		SAVEGAME->PlayerInfo.Health);
+
+	TArray<AActor*> AIs;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseAI::StaticClass(), AIs);
+	for (AActor* Actor : AIs)
+	{
+		ABaseAI* Bot = Cast<ABaseAI>(Actor);
+		FName BotName = Bot->GetFName();
+		bool IsDead = true;
+		for (int32 i = 0; i < GameInstance->SaveGameObject->BotsInfo.Num(); i++)
+		{
+			if (SAVEGAME->BotsInfo[i].BotName == BotName)
+			{
+				Bot->LoadedData(SAVEGAME->BotsInfo[i].bDead, SAVEGAME->BotsInfo[i].Health);
+				IsDead = false;
+				break;
+			}
+		}
+		if (IsDead)
+		{
+			Bot->LoadedData(IsDead, 0.f);
+		}
+	}
+
+	TArray<AActor*> PowerUps;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APowerUp::StaticClass(), PowerUps);
+	for (AActor* Actor : PowerUps)
+	{
+		APowerUp* PowerUp = Cast<APowerUp>(Actor);
+		FName PowerUpName = PowerUp->GetFName();
+		bool bTaken = true;
+		for (int32 i = 0; i < GameInstance->SaveGameObject->PowerUpsInfo.Num(); i++)
+		{
+			if (SAVEGAME->PowerUpsInfo[i].PowerUpName == PowerUpName)
+			{
+				PowerUp->LoadedData(false);
+				bTaken = false;
+				break;
+			}
+		}
+		if (bTaken)
+		{
+			PowerUp->LoadedData(bTaken);
+		}
+	}
 }

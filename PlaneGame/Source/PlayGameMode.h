@@ -90,7 +90,7 @@ public:
 	*/
 	void ParseDataToSave();
 
-	void PlayerReachedEndPlate() { EndGame(true); }
+	void PlayerReachedEndPlate() { EndLevel(); MoveToNextLevel(); }
 protected:
 
 	void BeginPlay() override;
@@ -104,6 +104,13 @@ private:
 	*/
 	void EndGame(bool bPlayerWin);
 
+	void EndLevel();
+
+	void ParsePlayerData();
+
+	void MoveToNextLevel();
+
+	void LoadData();
 	/**
 	* Function goes to main menu after game end
 	*/

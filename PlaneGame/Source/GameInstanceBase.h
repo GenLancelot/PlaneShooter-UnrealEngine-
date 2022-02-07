@@ -87,6 +87,10 @@ public:
 
 	FName GetCurrentLevelName() { return FName(*CurrentLevelName); }
 
+	bool GetNewLevel() { return bNewLevel; }
+
+	void SetNewLevel(bool NewLevel) { bNewLevel = NewLevel; }
+
 private:
 
 	FString PlayerName = "Unnamed Player";
@@ -96,6 +100,8 @@ private:
 	FString CurrentLevelName = "Level" + FString::FromInt(CurrentLevel);
 
 	bool bShouldLoadSavedGame = false;
+
+	bool bNewLevel = false;
 
 	/**
 	* Function to log some information about save gmae
