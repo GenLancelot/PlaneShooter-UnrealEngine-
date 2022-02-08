@@ -252,7 +252,6 @@ void APlayGameMode::AfterGameEnd()
 
 void APlayGameMode::MoveToNextLevel()
 {
-	//#TODO:Move to next level - probably will be needed to put playerdata in gameinstance or sth
 	UE_LOG(LogTemp, Warning, TEXT("Moving to next level"));
 	GameInstance->NextLevel();
 	GameInstance->SetNewLevel(true);

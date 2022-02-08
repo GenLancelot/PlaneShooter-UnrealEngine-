@@ -96,6 +96,7 @@ void APlayerPawn::DetachBomb()
 
 void APlayerPawn::DropBomb()
 {
+	if (!bHaveBomb) return;
 	bHaveBomb = false;
 	GameMode->UpdateBomb(bHaveBomb);
 	DetachBomb();

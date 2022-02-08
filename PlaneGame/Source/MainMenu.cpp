@@ -36,6 +36,7 @@ void UMainMenu::StartNewGame()
 			PlayerController->SetShowMouseCursor(false);
 			UGameInstanceBase* GameInstance = Cast<UGameInstanceBase>(UGameplayStatics::GetGameInstance(GetWorld()));
 			GameInstance->SetShouldLoadSavedGame(false);
+			GameInstance->SetCurrentLevel(1);
 			UGameplayStatics::OpenLevel(GetWorld(), GameInstance->GetCurrentLevelName());
 		}
 	}
