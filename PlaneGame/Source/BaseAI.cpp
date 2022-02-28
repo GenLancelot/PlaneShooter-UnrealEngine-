@@ -89,7 +89,7 @@ void ABaseAI::Move()
 		NewActorLocation = FMath::Lerp(FirstLocation, SecondLocation, ratio);
 	else
 		NewActorLocation = FMath::Lerp(SecondLocation, FirstLocation, ratio);
-	SetActorLocation(NewActorLocation);
+	SetActorLocation(NewActorLocation, true);
 }
 
 void ABaseAI::ResetAndRotate()
